@@ -34,6 +34,7 @@
 #include "mesh/generated/meshtastic/config.pb.h"
 #include "meshUtils.h"
 #include "modules/Modules.h"
+#include "modules/cattle/CattleReporter.h"
 #include "sleep.h"
 #include "target_specific.h"
 #include <memory>
@@ -957,6 +958,9 @@ void setup()
     // Now that the mesh service is created, create any modules
     setupModules();
 
+    // Initialize cattle module once at startup
+    CattleReporter_Init();
+
 #if !MESHTASTIC_EXCLUDE_I2C
     // Inform modules about I2C devices
     ScanI2CCompleted(i2cScanner.get());
@@ -1601,6 +1605,10 @@ void loop()
 #endif
 
     service->loop();
+
+    // Let cattle reporter run periodically
+    CattleReporter_Poll();
+
 #if !MESHTASTIC_EXCLUDE_INPUTBROKER && defined(HAS_FREE_RTOS) && !defined(ARCH_RP2040)
     if (inputBroker)
         inputBroker->processInputEventQueue();
